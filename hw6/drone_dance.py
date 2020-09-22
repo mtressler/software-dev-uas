@@ -179,7 +179,6 @@ class Dances:
         y_list = []
 
         for n in range(5):
-            print(copters[n].direction)
             curr.append(copters[n].location.global_relative_frame)
 
         curr_dist0 = distance.distance((curr[0].lat, curr[0].lon), (point_list[0].lat, point_list[0].lon)).meters
@@ -187,9 +186,15 @@ class Dances:
         curr_dist2 = distance.distance((curr[2].lat, curr[2].lon), (point_list[2].lat, point_list[2].lon)).meters
         curr_dist3 = distance.distance((curr[3].lat, curr[3].lon), (point_list[3].lat, point_list[3].lon)).meters
         curr_dist4 = distance.distance((curr[4].lat, curr[4].lon), (point_list[4].lat, point_list[4].lon)).meters
-        print(curr_dist1)
 
-        print(copters[0].location.global_relative_frame)
+        for i in range(4):
+            print('copter %s location: %s' % (i+1, copters[i+1].location.global_relative_frame))
+            print('Target for copter %s: %s' % (i+1, point_list[i+1]))
+        
+        print('Copter 1 is %s from target' %  curr_dist1)
+        print('Copter 2 is %s from target' %  curr_dist2)
+        print('Copter 3 is %s from target' %  curr_dist3)
+        print('Copter 4 is %s from target' %  curr_dist4)
         
         while curr_dist0 > .5 or curr_dist1 > .5 or curr_dist2 > .5 or curr_dist3 > .5 or curr_dist4 > .5:
            
@@ -198,6 +203,9 @@ class Dances:
                 x_list.append(curr[n].lat)
                 y_list.append(curr[n].lon)
 
+            for i in range(4):
+                print('copter %s location: %s' % (i+1, copters[i+1].location.global_relative_frame))
+                print('Target for copter %s: %s' % (i+1, point_list[i+1]))
 
             loc.add_xcor(x_list)
             loc.add_ycor(y_list) 
@@ -210,10 +218,10 @@ class Dances:
             curr_dist3 = distance.distance((curr[3].lat, curr[3].lon), (point_list[3].lat, point_list[3].lon)).meters
             curr_dist4 = distance.distance((curr[4].lat, curr[4].lon), (point_list[4].lat, point_list[4].lon)).meters
            
-            print(curr_dist1)
-            print(curr_dist2)
-            print(curr_dist3)
-            print(curr_dist4)
+            print('Copter 1 is %s from target' %  curr_dist1)
+            print('Copter 2 is %s from target' %  curr_dist2)
+            print('Copter 3 is %s from target' %  curr_dist3)
+            print('Copter 4 is %s from target' %  curr_dist4)
 
             x_list = []
             y_list = []
@@ -234,7 +242,7 @@ class Dances:
 
         start_time = time.time()
 
-        while time.time() - start_time < 20:
+        while time.time() - start_time < 60:
             print("start move")
             for copter in copters:
                 x = copter.location.global_relative_frame.lat
