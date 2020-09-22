@@ -161,7 +161,7 @@ class Location_Tracker:
 
     def add_xcor(self, x_list):
 
-        print(x_list)
+        print(x_list) 
         for index, x_val in enumerate(x_list):
             self.x_cor[index].append(x_val)
 
