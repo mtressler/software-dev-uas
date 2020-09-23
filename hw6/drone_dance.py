@@ -23,7 +23,7 @@ class Ground_Control:
 
         # Starting coordinates
         start_coordinates = [41.714429, -86.242085,0]
-        offset = .00002
+        offset = .00005
 
         # Copter list
         coordinates = [start_coordinates[0],start_coordinates[1],start_coordinates[2]]
@@ -186,26 +186,18 @@ class Dances:
         curr_dist2 = distance.distance((curr[2].lat, curr[2].lon), (point_list[2].lat, point_list[2].lon)).meters
         curr_dist3 = distance.distance((curr[3].lat, curr[3].lon), (point_list[3].lat, point_list[3].lon)).meters
         curr_dist4 = distance.distance((curr[4].lat, curr[4].lon), (point_list[4].lat, point_list[4].lon)).meters
-
-        for i in range(4):
-            print('copter %s location: %s' % (i+1, copters[i+1].location.global_relative_frame))
-            print('Target for copter %s: %s' % (i+1, point_list[i+1]))
         
         print('Copter 1 is %s from target' %  curr_dist1)
         print('Copter 2 is %s from target' %  curr_dist2)
         print('Copter 3 is %s from target' %  curr_dist3)
         print('Copter 4 is %s from target' %  curr_dist4)
         
-        while curr_dist0 > .5 or curr_dist1 > .5 or curr_dist2 > .5 or curr_dist3 > .5 or curr_dist4 > .5:
+        while curr_dist0 > 1 or curr_dist1 > 1 or curr_dist2 > 1 or curr_dist3 > 1 or curr_dist4 > 1:
            
             for n in range(5):
                 curr[n] = copters[n].location.global_relative_frame
                 x_list.append(curr[n].lat)
                 y_list.append(curr[n].lon)
-
-            for i in range(4):
-                print('copter %s location: %s' % (i+1, copters[i+1].location.global_relative_frame))
-                print('Target for copter %s: %s' % (i+1, point_list[i+1]))
 
             loc.add_xcor(x_list)
             loc.add_ycor(y_list) 
@@ -217,11 +209,6 @@ class Dances:
             curr_dist2 = distance.distance((curr[2].lat, curr[2].lon), (point_list[2].lat, point_list[2].lon)).meters
             curr_dist3 = distance.distance((curr[3].lat, curr[3].lon), (point_list[3].lat, point_list[3].lon)).meters
             curr_dist4 = distance.distance((curr[4].lat, curr[4].lon), (point_list[4].lat, point_list[4].lon)).meters
-           
-            print('Copter 1 is %s from target' %  curr_dist1)
-            print('Copter 2 is %s from target' %  curr_dist2)
-            print('Copter 3 is %s from target' %  curr_dist3)
-            print('Copter 4 is %s from target' %  curr_dist4)
 
             x_list = []
             y_list = []
@@ -238,17 +225,15 @@ class Dances:
     def cube(copters, loc):
         
         point_list = []
-        offset = .00004
+        offset = .0001
 
         start_time = time.time()
 
-        while time.time() - start_time < 60:
+        while time.time() - start_time < 40:
             print("start move")
             for copter in copters:
                 x = copter.location.global_relative_frame.lat
                 y = copter.location.global_relative_frame.lon
-                print(x)
-                print(y)
 
                 if copter.direction == 0:
                     pass
@@ -270,17 +255,87 @@ class Dances:
                 point_list.append(point) 
 
                 copter.simple_goto(point)
-                print("moving a coptor")
-                print("%f, %f" % (x,y))
 
             print("waiting for coptor to reach target")
             Dances.at_target(copters, point_list, loc)
             print("coptors reached target")
+            point_list = []
+
+
+    # 0: stationary
+    # 1: right + small down
+    # 1.5: left + small down
+    # 2: down + little left
+    # 2.5: up + little left
+    # 3: left + little up
+    # 3.5: right + little up
+    # 4: up + little right
+    # 4.5: down + little right
+    @staticmethod
+    def star(copters, loc):
+        
+        point_list = []
+        offset = .00005
+
+        start_time = time.time()
+
+        while time.time() - start_time < 40:
+            print("start move")
+            for copter in copters:
+                x = copter.location.global_relative_frame.lat
+                y = copter.location.global_relative_frame.lon
+
+                if copter.direction == 0:
+                    pass
+                elif copter.direction == 1:
+                    x -= offset
+                    y += offset * 2
+                    copter.direction = 1.5
+                elif copter.direction == 1.5:
+                    x -= offset
+                    y -= offset * 2
+                    copter.direction = 2
+                elif copter.direction == 2:
+                    x -= offset * 2
+                    y -= offset
+                    copter.direction = 2.5
+                elif copter.direction == 2.5:
+                    x += offset * 2
+                    y -= offset
+                    copter.direction = 3
+                elif copter.direction == 3:
+                    x += offset
+                    y -= offset * 2
+                    copter.direction = 3.5
+                elif copter.direction == 3.5:
+                    x += offset
+                    y += offset * 2
+                    copter.direction = 4
+                elif copter.direction == 4:
+                    x += offset * 2
+                    y += offset
+                    copter.direction = 4.5
+                elif copter.direction == 4.5:
+                    x -= offset * 2
+                    y += offset
+                    copter.direction = 1
+
+                point = LocationGlobalRelative(x, y, 10)
+
+                point_list.append(point) 
+
+                copter.simple_goto(point)
+
+            print("waiting for coptor to reach target")
+            Dances.at_target(copters, point_list, loc)
+            print("coptors reached target")
+            point_list = []
 
 
 gc = Ground_Control()
 loc = Location_Tracker()
-Dances.cube(gc.copters, loc)
+#Dances.cube(gc.copters, loc)
+Dances.star(gc.copters, loc)
 loc.plot_journey()
 
 
