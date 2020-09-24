@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-© Copyright 2015-2016, 3D Robotics.
-simple_goto.py: GUIDED mode "simple goto" example (Copter Only)
-Demonstrates how to arm and takeoff in Copter and how to navigate to points using Vehicle.simple_goto.
-Full documentation is provided at http://python.dronekit.io/examples/simple_goto.html
-"""
-
 import time
 import math
 from geopy import distance
@@ -15,6 +8,7 @@ import matplotlib.pyplot as plt
 from dronekit_sitl import SITL
 from dronekit import Vehicle, VehicleMode, connect, LocationGlobalRelative
 
+#responsible for connecting to drones, and having them get up to altitude
 class Ground_Control:
 
     def __init__(self):
@@ -135,6 +129,7 @@ class Ground_Control:
         print("Waiting for copters to ascend")
         self.copters_at_altitude(aTargetAltitude)
 
+#Responsible for keeping track of coordinates and eventually plotting the drones' journeys
 class Location_Tracker:
 
     def __init__(self):
@@ -150,8 +145,6 @@ class Location_Tracker:
 
         plot_colors = ['bo', 'ro', 'co', 'mo', 'ko']
 
-        print(self.x_cor)
-
         for index in range(5):
             plt.plot(self.x_cor[index], self.y_cor[index], plot_colors[index])
         41.714429, -86.242085
@@ -160,8 +153,6 @@ class Location_Tracker:
         plt.show()
 
     def add_xcor(self, x_list):
-
-        print(x_list) 
         for index, x_val in enumerate(x_list):
             self.x_cor[index].append(x_val)
 
@@ -169,8 +160,10 @@ class Location_Tracker:
         for index, y_val in enumerate(y_list):
             self.y_cor[index].append(y_val)
 
+#Defines the behaviors of dances for a given list of drones
 class Dances:
 
+    #Loops and tracks coodinates of drones until all are at their desired points
     @staticmethod
     def at_target(copters, point_list, loc):
 
@@ -202,8 +195,6 @@ class Dances:
             loc.add_xcor(x_list)
             loc.add_ycor(y_list) 
 
-            print(copters[0].location.global_relative_frame)
-
             curr_dist0 = distance.distance((curr[0].lat, curr[0].lon), (point_list[0].lat, point_list[0].lon)).meters
             curr_dist1 = distance.distance((curr[1].lat, curr[1].lon), (point_list[1].lat, point_list[1].lon)).meters
             curr_dist2 = distance.distance((curr[2].lat, curr[2].lon), (point_list[2].lat, point_list[2].lon)).meters
@@ -221,6 +212,7 @@ class Dances:
     # 3: up
     # 4: right
     
+    #Defines the dance where drones track around a square outline
     @staticmethod
     def cube(copters, loc):
         
@@ -235,6 +227,7 @@ class Dances:
                 x = copter.location.global_relative_frame.lat
                 y = copter.location.global_relative_frame.lon
 
+                #Update drone directions
                 if copter.direction == 0:
                     pass
                 elif copter.direction == 1:
@@ -257,6 +250,7 @@ class Dances:
                 copter.simple_goto(point)
 
             print("waiting for coptor to reach target")
+            #Block until all drones are at their target points
             Dances.at_target(copters, point_list, loc)
             print("coptors reached target")
             point_list = []
@@ -271,6 +265,8 @@ class Dances:
     # 3.5: right + little up
     # 4: up + little right
     # 4.5: down + little right
+
+    #Defines the dance where drones track along the outline of a star shape
     @staticmethod
     def star(copters, loc):
         
@@ -285,6 +281,7 @@ class Dances:
                 x = copter.location.global_relative_frame.lat
                 y = copter.location.global_relative_frame.lon
 
+                #Update drone directions
                 if copter.direction == 0:
                     pass
                 elif copter.direction == 1:
@@ -327,6 +324,7 @@ class Dances:
                 copter.simple_goto(point)
 
             print("waiting for coptor to reach target")
+            #Block until all drones are at their target points
             Dances.at_target(copters, point_list, loc)
             print("coptors reached target")
             point_list = []
@@ -336,37 +334,5 @@ gc = Ground_Control()
 loc = Location_Tracker()
 #Dances.cube(gc.copters, loc)
 Dances.star(gc.copters, loc)
+gc.land_drones()
 loc.plot_journey()
-
-
-
-'''
-for n in range(5):
-    copters[n].simple_goto(LocationGlobalRelative(41.715446, -86.242064, 10), groundspeed=5)
-
-time.sleep(10)
-print ('Current position of vehicle1 is: %s' % copters[0].location.global_frame)
-print ('Current position of vehicle2 is: %s' % copters[1].location.global_frame)
-print ('Current position of vehicle3 is: %s' % copters[2].location.global_frame)
-print ('Current position of vehicle4 is: %s' % copters[3].location.global_frame)
-print ('Current position of vehicle5 is: %s' % copters[4].location.global_frame)
-
-for n in range(5):
-    coordinates = [start_coordinates[0],start_coordinates[1]-(0.00005*n),start_coordinates[2]]
-    copters[n].simple_goto(LocationGlobalRelative(coordinates[0], coordinates[1], coordinates[2]), groundspeed=5)
-
-
-
-
-# Land them
-land_drones()
-
-# Close all vehicles
-for c in copters:
-  c.close()
-
-# Shut down simulators
-for s in sitls:
-    s.stop()
-
-'''
